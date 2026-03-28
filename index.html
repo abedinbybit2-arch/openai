@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Firebase Login</title>
+  <title>Firebase + Hot Market</title>
   <style>
     body {
       font-family: Arial;
       text-align: center;
-      margin-top: 100px;
+      margin-top: 50px;
     }
     .box {
       border: 1px solid #ccc;
       padding: 20px;
-      width: 300px;
-      margin: auto;
+      width: 320px;
+      margin: 20px auto;
       border-radius: 10px;
     }
     input {
@@ -30,6 +30,10 @@
     }
     #successPage {
       display: none;
+    }
+    .coin {
+      margin: 5px 0;
+      font-size: 18px;
     }
   </style>
 </head>
@@ -50,6 +54,16 @@
 <div class="box" id="successPage">
   <h2>🎉 Success!</h2>
   <p id="userEmail"></p>
+
+  <h3>🔥 Hot Market</h3>
+  <div id="market">
+    <div class="coin" id="btc">BTC: Loading...</div>
+    <div class="coin" id="eth">ETH: Loading...</div>
+    <div class="coin" id="bnb">BNB: Loading...</div>
+    <div class="coin" id="sol">SOL: Loading...</div>
+    <div class="coin" id="xrp">XRP: Loading...</div>
+  </div>
+
   <button onclick="logout()">Logout</button>
 </div>
 
@@ -59,7 +73,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebas
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } 
 from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
-// তোমার config
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyB3lYDIr8ElAWk-jwnOWxubtVS-TeSSyOg",
   authDomain: "uyguy-ab047.firebaseapp.com",
@@ -72,22 +86,22 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// UI switch function
+// Show success UI
 function showSuccess(email) {
   document.getElementById("loginPage").style.display = "none";
   document.getElementById("successPage").style.display = "block";
   document.getElementById("userEmail").innerText = "Logged in as: " + email;
+
+  startMarket(); // start price update
 }
 
 // Signup
 window.signup = function() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const email = email.value;
+  const password = password.value;
 
   createUserWithEmailAndPassword(auth, email, password)
-    .then(user => {
-      showSuccess(user.user.email);
-    })
+    .then(user => showSuccess(user.user.email))
     .catch(err => alert(err.message));
 }
 
@@ -97,9 +111,7 @@ window.login = function() {
   const password = document.getElementById("password").value;
 
   signInWithEmailAndPassword(auth, email, password)
-    .then(user => {
-      showSuccess(user.user.email);
-    })
+    .then(user => showSuccess(user.user.email))
     .catch(err => alert(err.message));
 }
 
@@ -109,6 +121,30 @@ window.logout = function() {
     document.getElementById("loginPage").style.display = "block";
     document.getElementById("successPage").style.display = "none";
   });
+}
+
+// 🔥 Binance API Market Function
+function startMarket() {
+  setInterval(async () => {
+    try {
+      const res = await fetch("https://api.binance.com/api/v3/ticker/price");
+      const data = await res.json();
+
+      const getPrice = (symbol) => {
+        const coin = data.find(c => c.symbol === symbol);
+        return coin ? parseFloat(coin.price).toFixed(2) : "N/A";
+      };
+
+      document.getElementById("btc").innerText = "BTC: $" + getPrice("BTCUSDT");
+      document.getElementById("eth").innerText = "ETH: $" + getPrice("ETHUSDT");
+      document.getElementById("bnb").innerText = "BNB: $" + getPrice("BNBUSDT");
+      document.getElementById("sol").innerText = "SOL: $" + getPrice("SOLUSDT");
+      document.getElementById("xrp").innerText = "XRP: $" + getPrice("XRPUSDT");
+
+    } catch (e) {
+      console.log("API error", e);
+    }
+  }, 1000); // প্রতি ১ সেকেন্ডে update
 }
 
 </script>
