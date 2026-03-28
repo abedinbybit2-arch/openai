@@ -1,7 +1,9 @@
-<!DOCTYPE html>
+v<!DOCTYPE html>
 <html>
 <head>
-  <title>Crypto App</title>
+  <title>Pro Crypto App</title>
+  <script src="https://s3.tradingview.com/tv.js"></script>
+
   <style>
     body {
       margin: 0;
@@ -10,192 +12,139 @@
       color: white;
     }
 
-    .container {
-      width: 100%;
-      max-width: 400px;
-      margin: auto;
-      margin-top: 80px;
+    .top {
+      padding: 15px;
+      text-align: center;
+      background: #181a20;
     }
 
-    .card {
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
+
+    .box {
       background: #181a20;
       padding: 20px;
+      margin: 10px;
       border-radius: 10px;
-      box-shadow: 0 0 10px #000;
     }
 
-    input {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      background: #2b3139;
-      border: none;
-      color: white;
-      border-radius: 5px;
+    input, button {
+      padding: 10px;
+      margin: 5px;
     }
 
     button {
-      width: 100%;
-      padding: 12px;
       background: #fcd535;
       border: none;
-      border-radius: 5px;
-      font-weight: bold;
       cursor: pointer;
     }
 
-    h2 {
-      text-align: center;
-    }
-
-    #dashboard {
-      display: none;
-    }
+    #app { display: none; }
 
     .coin {
       display: flex;
       justify-content: space-between;
-      padding: 10px;
-      border-bottom: 1px solid #2b3139;
-    }
-
-    .green { color: #0ecb81; }
-    .red { color: #f6465d; }
-
-    .topbar {
-      background: #181a20;
-      padding: 15px;
-      text-align: center;
-      font-weight: bold;
-      border-bottom: 1px solid #2b3139;
+      padding: 8px;
+      border-bottom: 1px solid #333;
     }
   </style>
 </head>
 <body>
 
-<div class="topbar">💰 Crypto Market</div>
+<div class="top">🚀 Crypto Trading App</div>
 
 <!-- LOGIN -->
 <div class="container" id="login">
-  <div class="card">
-    <h2>Login</h2>
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
-    <button onclick="signup()">Sign Up</button><br><br>
+  <div class="box">
+    <h3>Login</h3>
+    <input id="email" placeholder="Email"><br>
+    <input id="pass" type="password" placeholder="Password"><br>
+    <button onclick="signup()">Signup</button>
     <button onclick="loginUser()">Login</button>
   </div>
 </div>
 
-<!-- DASHBOARD -->
-<div class="container" id="dashboard">
-  <div class="card">
-    <h2>🔥 Hot Market</h2>
-    <p id="user"></p>
+<!-- APP -->
+<div id="app" class="container">
 
-    <div id="coins">
-      <div class="coin"><span>BTC</span><span id="BTC">...</span></div>
-      <div class="coin"><span>ETH</span><span id="ETH">...</span></div>
-      <div class="coin"><span>BNB</span><span id="BNB">...</span></div>
-      <div class="coin"><span>SOL</span><span id="SOL">...</span></div>
-      <div class="coin"><span>XRP</span><span id="XRP">...</span></div>
-    </div>
-
-    <br>
-    <button onclick="logout()">Logout</button>
+  <div class="box">
+    <h3>📊 Live Chart</h3>
+    <div id="chart" style="height:400px;"></div>
   </div>
+
+  <div class="box">
+    <h3>🔥 Market</h3>
+    <div id="market"></div>
+  </div>
+
+  <div class="box">
+    <h3>💰 Trade (Demo)</h3>
+    <button onclick="buy()">Buy</button>
+    <button onclick="sell()">Sell</button>
+  </div>
+
 </div>
 
 <script type="module">
 // Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } 
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } 
 from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyB3lYDIr8ElAWk-jwnOWxubtVS-TeSSyOg",
-  authDomain: "uyguy-ab047.firebaseapp.com",
-  projectId: "uyguy-ab047",
-  storageBucket: "uyguy-ab047.firebasestorage.app",
-  messagingSenderId: "297739792713",
-  appId: "1:297739792713:web:72af3ba75fabcacb3caa98"
-};
-
-const app = initializeApp(firebaseConfig);
+const app = initializeApp({
+  apiKey: "AIzaSy...",
+  authDomain: "uyguy-ab047.firebaseapp.com"
+});
 const auth = getAuth(app);
 
-// UI switch
-function showDashboard(email) {
-  document.getElementById("login").style.display = "none";
-  document.getElementById("dashboard").style.display = "block";
-  document.getElementById("user").innerText = "👤 " + email;
-  startMarket();
-}
+// login
+window.signup = () => {
+  createUserWithEmailAndPassword(auth,email.value,pass.value)
+  .then(()=>start());
+};
 
-// Signup
-window.signup = function() {
-  const email = document.getElementById("email").value;
-  const pass = document.getElementById("password").value;
+window.loginUser = () => {
+  signInWithEmailAndPassword(auth,email.value,pass.value)
+  .then(()=>start());
+};
 
-  createUserWithEmailAndPassword(auth, email, pass)
-    .then(res => showDashboard(res.user.email))
-    .catch(err => alert(err.message));
-}
+// start app
+function start(){
+  login.style.display="none";
+  app.style.display="block";
 
-// Login
-window.loginUser = function() {
-  const email = document.getElementById("email").value;
-  const pass = document.getElementById("password").value;
-
-  signInWithEmailAndPassword(auth, email, pass)
-    .then(res => showDashboard(res.user.email))
-    .catch(err => alert(err.message));
-}
-
-// Logout
-window.logout = function() {
-  signOut(auth).then(() => {
-    location.reload();
+  // chart
+  new TradingView.widget({
+    container_id: "chart",
+    symbol: "BINANCE:BTCUSDT",
+    interval: "1",
+    theme: "dark"
   });
+
+  loadMarket();
 }
 
-// Market
-let oldPrices = {};
+// market
+async function loadMarket(){
+  setInterval(async ()=>{
+    const res=await fetch("https://api.binance.com/api/v3/ticker/price");
+    const data=await res.json();
 
-function startMarket() {
-  setInterval(async () => {
-    const res = await fetch("https://api.binance.com/api/v3/ticker/price");
-    const data = await res.json();
+    let html="";
+    data.slice(0,20).forEach(c=>{
+      html+=`<div class="coin">${c.symbol} - $${parseFloat(c.price).toFixed(2)}</div>`;
+    });
 
-    const get = (sym) => {
-      const c = data.find(x => x.symbol === sym);
-      return parseFloat(c.price);
-    };
-
-    update("BTC", get("BTCUSDT"));
-    update("ETH", get("ETHUSDT"));
-    update("BNB", get("BNBUSDT"));
-    update("SOL", get("SOLUSDT"));
-    update("XRP", get("XRPUSDT"));
-
-  }, 1000);
+    market.innerHTML=html;
+  },1000);
 }
 
-function update(id, price) {
-  const el = document.getElementById(id);
-  const old = oldPrices[id];
+// demo trade
+window.buy=()=>alert("Buy order placed (demo)");
+window.sell=()=>alert("Sell order placed (demo)");
 
-  el.innerText = "$" + price.toFixed(2);
-
-  if (old) {
-    if (price > old) {
-      el.className = "green";
-    } else if (price < old) {
-      el.className = "red";
-    }
-  }
-
-  oldPrices[id] = price;
-}
 </script>
 
 </body>
