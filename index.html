@@ -31,15 +31,10 @@
     #successPage {
       display: none;
     }
-    .coin {
-      margin: 5px 0;
-      font-size: 18px;
-    }
   </style>
 </head>
 <body>
 
-<!-- Login UI -->
 <div class="box" id="loginPage">
   <h2>Login / Signup</h2>
 
@@ -50,30 +45,28 @@
   <button onclick="login()">Login</button>
 </div>
 
-<!-- Success UI -->
 <div class="box" id="successPage">
   <h2>🎉 Success!</h2>
   <p id="userEmail"></p>
 
   <h3>🔥 Hot Market</h3>
   <div id="market">
-    <div class="coin" id="btc">BTC: Loading...</div>
-    <div class="coin" id="eth">ETH: Loading...</div>
-    <div class="coin" id="bnb">BNB: Loading...</div>
-    <div class="coin" id="sol">SOL: Loading...</div>
-    <div class="coin" id="xrp">XRP: Loading...</div>
+    <p id="btc">BTC: Loading...</p>
+    <p id="eth">ETH: Loading...</p>
+    <p id="bnb">BNB: Loading...</p>
+    <p id="sol">SOL: Loading...</p>
+    <p id="xrp">XRP: Loading...</p>
   </div>
 
   <button onclick="logout()">Logout</button>
 </div>
 
 <script type="module">
-// Firebase import
+// Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } 
 from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyB3lYDIr8ElAWk-jwnOWxubtVS-TeSSyOg",
   authDomain: "uyguy-ab047.firebaseapp.com",
@@ -86,33 +79,41 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Show success UI
+// UI change
 function showSuccess(email) {
   document.getElementById("loginPage").style.display = "none";
   document.getElementById("successPage").style.display = "block";
   document.getElementById("userEmail").innerText = "Logged in as: " + email;
 
-  startMarket(); // start price update
+  startMarket(); // market start
 }
 
 // Signup
 window.signup = function() {
-  const email = email.value;
-  const password = password.value;
+  const emailVal = document.getElementById("email").value;
+  const passwordVal = document.getElementById("password").value;
 
-  createUserWithEmailAndPassword(auth, email, password)
-    .then(user => showSuccess(user.user.email))
-    .catch(err => alert(err.message));
+  createUserWithEmailAndPassword(auth, emailVal, passwordVal)
+    .then((userCredential) => {
+      showSuccess(userCredential.user.email);
+    })
+    .catch((error) => {
+      alert(error.message);
+    });
 }
 
 // Login
 window.login = function() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const emailVal = document.getElementById("email").value;
+  const passwordVal = document.getElementById("password").value;
 
-  signInWithEmailAndPassword(auth, email, password)
-    .then(user => showSuccess(user.user.email))
-    .catch(err => alert(err.message));
+  signInWithEmailAndPassword(auth, emailVal, passwordVal)
+    .then((userCredential) => {
+      showSuccess(userCredential.user.email);
+    })
+    .catch((error) => {
+      alert(error.message);
+    });
 }
 
 // Logout
@@ -123,28 +124,33 @@ window.logout = function() {
   });
 }
 
-// 🔥 Binance API Market Function
+// Market function
+let marketStarted = false;
+
 function startMarket() {
+  if (marketStarted) return;
+  marketStarted = true;
+
   setInterval(async () => {
     try {
       const res = await fetch("https://api.binance.com/api/v3/ticker/price");
       const data = await res.json();
 
-      const getPrice = (symbol) => {
-        const coin = data.find(c => c.symbol === symbol);
-        return coin ? parseFloat(coin.price).toFixed(2) : "N/A";
+      const price = (sym) => {
+        const c = data.find(x => x.symbol === sym);
+        return c ? parseFloat(c.price).toFixed(2) : "N/A";
       };
 
-      document.getElementById("btc").innerText = "BTC: $" + getPrice("BTCUSDT");
-      document.getElementById("eth").innerText = "ETH: $" + getPrice("ETHUSDT");
-      document.getElementById("bnb").innerText = "BNB: $" + getPrice("BNBUSDT");
-      document.getElementById("sol").innerText = "SOL: $" + getPrice("SOLUSDT");
-      document.getElementById("xrp").innerText = "XRP: $" + getPrice("XRPUSDT");
+      document.getElementById("btc").innerText = "BTC: $" + price("BTCUSDT");
+      document.getElementById("eth").innerText = "ETH: $" + price("ETHUSDT");
+      document.getElementById("bnb").innerText = "BNB: $" + price("BNBUSDT");
+      document.getElementById("sol").innerText = "SOL: $" + price("SOLUSDT");
+      document.getElementById("xrp").innerText = "XRP: $" + price("XRPUSDT");
 
     } catch (e) {
       console.log("API error", e);
     }
-  }, 1000); // প্রতি ১ সেকেন্ডে update
+  }, 1000);
 }
 
 </script>
