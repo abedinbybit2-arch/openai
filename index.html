@@ -1,51 +1,117 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login Page</title>
-    <style>
-        body {
-            background-color: #f2f2f2;
-            font-family: Arial;
-        }
-
-        .login-box {
-            width: 400px;
-            margin: 100px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            text-align: center;
-        }
-
-        input {
-            width: 90%;
-            padding: 10px;
-            margin: 10px 0;
-        }
-
-        button {
-            padding: 10px 20px;
-            background: blue;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-
-        button:hover {
-            background: darkblue;
-        }
-    </style>
+  <title>Firebase Login</title>
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      margin-top: 100px;
+    }
+    .box {
+      border: 1px solid #ccc;
+      padding: 20px;
+      width: 300px;
+      margin: auto;
+      border-radius: 10px;
+    }
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      background: blue;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    #successPage {
+      display: none;
+    }
+  </style>
 </head>
 <body>
 
-<div class="login-box">
-    <h1>Login</h1>
-    
-    <input type="text" placeholder="Username"><br>
-    <input type="password" placeholder="Password"><br>
-    
-    <button>Login</button>
+<!-- Login UI -->
+<div class="box" id="loginPage">
+  <h2>Login / Signup</h2>
+
+  <input type="email" id="email" placeholder="Email"><br>
+  <input type="password" id="password" placeholder="Password"><br>
+
+  <button onclick="signup()">Sign Up</button>
+  <button onclick="login()">Login</button>
 </div>
-            <p>abedin hard team </p>
+
+<!-- Success UI -->
+<div class="box" id="successPage">
+  <h2>🎉 Success!</h2>
+  <p id="userEmail"></p>
+  <button onclick="logout()">Logout</button>
+</div>
+
+<script type="module">
+// Firebase import
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } 
+from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+// তোমার config
+const firebaseConfig = {
+  apiKey: "AIzaSyB3lYDIr8ElAWk-jwnOWxubtVS-TeSSyOg",
+  authDomain: "uyguy-ab047.firebaseapp.com",
+  projectId: "uyguy-ab047",
+  storageBucket: "uyguy-ab047.firebasestorage.app",
+  messagingSenderId: "297739792713",
+  appId: "1:297739792713:web:72af3ba75fabcacb3caa98"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// UI switch function
+function showSuccess(email) {
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("successPage").style.display = "block";
+  document.getElementById("userEmail").innerText = "Logged in as: " + email;
+}
+
+// Signup
+window.signup = function() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  createUserWithEmailAndPassword(auth, email, password)
+    .then(user => {
+      showSuccess(user.user.email);
+    })
+    .catch(err => alert(err.message));
+}
+
+// Login
+window.login = function() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  signInWithEmailAndPassword(auth, email, password)
+    .then(user => {
+      showSuccess(user.user.email);
+    })
+    .catch(err => alert(err.message));
+}
+
+// Logout
+window.logout = function() {
+  signOut(auth).then(() => {
+    document.getElementById("loginPage").style.display = "block";
+    document.getElementById("successPage").style.display = "none";
+  });
+}
+
+</script>
+
 </body>
 </html>
