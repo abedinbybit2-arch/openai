@@ -1,151 +1,991 @@
-v<!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <title>Pro Crypto App</title>
-  <script src="https://s3.tradingview.com/tv.js"></script>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crypto Pro Dashboard</title>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: #0b0e11;
-      color: white;
+    :root{
+      --bg:#0b0e11;
+      --panel:#181a20;
+      --panel2:#1e2329;
+      --border:#2b3139;
+      --text:#eaecef;
+      --muted:#848e9c;
+      --yellow:#fcd535;
+      --green:#0ecb81;
+      --red:#f6465d;
+      --blue:#1e90ff;
     }
-
-    .top {
-      padding: 15px;
-      text-align: center;
-      background: #181a20;
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:var(--bg);
+      color:var(--text);
     }
-
-    .container {
-      max-width: 900px;
-      margin: auto;
+    .topbar{
+      position:sticky; top:0; z-index:20;
+      background:#11151b;
+      border-bottom:1px solid var(--border);
+      padding:14px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
     }
-
-    .box {
-      background: #181a20;
-      padding: 20px;
-      margin: 10px;
-      border-radius: 10px;
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      font-weight:700;
+      letter-spacing:.3px;
     }
-
-    input, button {
-      padding: 10px;
-      margin: 5px;
+    .logo{
+      width:14px;height:14px;border-radius:4px;background:var(--yellow);
+      box-shadow:0 0 20px rgba(252,213,53,.25);
     }
-
-    button {
-      background: #fcd535;
-      border: none;
-      cursor: pointer;
+    .top-actions{
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+      color:var(--muted);
+      font-size:13px;
     }
-
-    #app { display: none; }
-
-    .coin {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px;
-      border-bottom: 1px solid #333;
+    .pill{
+      padding:8px 12px; border:1px solid var(--border); border-radius:999px;
+      background:#0f1318;
+    }
+    .wrap{
+      max-width:1400px;
+      margin:0 auto;
+      padding:18px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 280px 1fr;
+      gap:16px;
+    }
+    .card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:18px;
+      box-shadow:0 10px 30px rgba(0,0,0,.18);
+    }
+    .side{
+      padding:16px;
+      height:fit-content;
+      position:sticky;
+      top:76px;
+    }
+    .side h3, .panel h3, .login h2{
+      margin:0 0 12px;
+      font-size:18px;
+    }
+    .navbtn{
+      width:100%;
+      text-align:left;
+      background:transparent;
+      color:var(--text);
+      border:1px solid transparent;
+      padding:12px 14px;
+      border-radius:12px;
+      cursor:pointer;
+      margin-bottom:8px;
+      font-size:14px;
+    }
+    .navbtn.active, .navbtn:hover{
+      background:var(--panel2);
+      border-color:var(--border);
+    }
+    .small{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.5;
+    }
+    .main{
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
+    .hero{
+      padding:18px;
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap:16px;
+    }
+    .hero-left, .hero-right{
+      background:var(--panel2);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:16px;
+    }
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+      margin-top:14px;
+    }
+    .stat{
+      background:var(--bg);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px;
+    }
+    .stat .label{color:var(--muted);font-size:12px}
+    .stat .value{font-size:20px;font-weight:700;margin-top:6px}
+    .toolbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    select, input, button{
+      font:inherit;
+    }
+    input, select{
+      width:100%;
+      background:#0f1318;
+      color:var(--text);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px 12px;
+      outline:none;
+    }
+    input:focus, select:focus{
+      border-color:#4d5968;
+    }
+    button{
+      cursor:pointer;
+    }
+    .btn{
+      background:var(--yellow);
+      color:#111;
+      border:none;
+      border-radius:12px;
+      padding:12px 14px;
+      font-weight:700;
+    }
+    .btn.secondary{
+      background:#2b3139;
+      color:var(--text);
+      border:1px solid var(--border);
+    }
+    .btn.green{background:var(--green);color:#07110d}
+    .btn.red{background:var(--red);color:#160709}
+    .sections{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:16px;
+    }
+    .panel{
+      padding:16px;
+    }
+    .markets{
+      width:100%;
+      border-collapse:collapse;
+      overflow:hidden;
+    }
+    .markets th, .markets td{
+      padding:12px 10px;
+      border-bottom:1px solid var(--border);
+      font-size:14px;
+      text-align:left;
+    }
+    .markets th{color:var(--muted);font-weight:600}
+    .pos{color:var(--green)}
+    .neg{color:var(--red)}
+    .muted{color:var(--muted)}
+    .price{
+      font-weight:700;
+    }
+    .chartbox{
+      padding:0;
+      overflow:hidden;
+    }
+    .chart-head{
+      padding:16px 16px 10px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .pair{
+      font-size:20px;
+      font-weight:800;
+    }
+    .chartmeta{
+      display:flex; gap:12px; flex-wrap:wrap; color:var(--muted); font-size:13px;
+    }
+    canvas{
+      display:block;
+      width:100%;
+      height:420px;
+      background:#0f1318;
+    }
+    .trade-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .seg{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .seg button{
+      flex:1;
+      background:#0f1318;
+      color:var(--text);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:10px;
+    }
+    .seg button.active{
+      background:var(--yellow);
+      color:#111;
+      font-weight:700;
+      border-color:var(--yellow);
+    }
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .rowitem{
+      background:#0f1318;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+    }
+    .rowitem .left{
+      display:flex;
+      flex-direction:column;
+      gap:3px;
+    }
+    .rowitem .title{font-weight:700}
+    .rowitem .sub{color:var(--muted);font-size:12px}
+    .login-wrap{
+      max-width:420px;
+      margin:72px auto;
+      padding:18px;
+    }
+    .login{
+      padding:20px;
+    }
+    .login .field{margin-bottom:12px}
+    .split{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    #appPage{display:none}
+    #marketTab,#tradeTab,#chartTab,#walletTab,#ordersTab{display:none}
+    .show{display:block !important}
+    .ghost{
+      color:var(--muted);
+      font-size:13px;
+    }
+    .hidden{display:none !important}
+    .footer-note{
+      margin-top:12px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+    @media (max-width:1100px){
+      .grid, .sections, .hero, .stats, .trade-grid, .split{
+        grid-template-columns:1fr;
+      }
+      .side{position:static}
     }
   </style>
 </head>
 <body>
-
-<div class="top">🚀 Crypto Trading App</div>
-
-<!-- LOGIN -->
-<div class="container" id="login">
-  <div class="box">
-    <h3>Login</h3>
-    <input id="email" placeholder="Email"><br>
-    <input id="pass" type="password" placeholder="Password"><br>
-    <button onclick="signup()">Signup</button>
-    <button onclick="loginUser()">Login</button>
-  </div>
-</div>
-
-<!-- APP -->
-<div id="app" class="container">
-
-  <div class="box">
-    <h3>📊 Live Chart</h3>
-    <div id="chart" style="height:400px;"></div>
+  <div class="topbar">
+    <div class="brand"><div class="logo"></div><div>Crypto Pro Dashboard</div></div>
+    <div class="top-actions">
+      <div class="pill" id="topEmail">Not signed in</div>
+      <div class="pill">Live market view</div>
+    </div>
   </div>
 
-  <div class="box">
-    <h3>🔥 Market</h3>
-    <div id="market"></div>
+  <div class="wrap">
+    <div id="loginPage" class="login-wrap">
+      <div class="card login">
+        <h2>Login / Sign Up</h2>
+        <p class="small">Firebase auth দিয়ে sign in করলে dashboard খুলবে।</p>
+        <div class="field">
+          <input type="email" id="email" placeholder="Email" />
+        </div>
+        <div class="field">
+          <input type="password" id="password" placeholder="Password" />
+        </div>
+        <div class="split">
+          <button class="btn" onclick="signup()">Sign Up</button>
+          <button class="btn secondary" onclick="loginUser()">Login</button>
+        </div>
+        <div class="footer-note">
+          Paper trading only. Real Binance trading, deposits, withdrawals, and account features are not included.
+        </div>
+      </div>
+    </div>
+
+    <div id="appPage">
+      <div class="grid">
+        <div class="card side">
+          <h3>Menu</h3>
+          <button class="navbtn active" onclick="showTab('market')">Market</button>
+          <button class="navbtn" onclick="showTab('chart')">Chart</button>
+          <button class="navbtn" onclick="showTab('trade')">Trade</button>
+          <button class="navbtn" onclick="showTab('wallet')">Wallet</button>
+          <button class="navbtn" onclick="showTab('orders')">Orders</button>
+          <hr style="border:none;border-top:1px solid var(--border);margin:14px 0;">
+          <div class="small">
+            Live quotes refresh every 1 second.<br>
+            Candles refresh every 15 seconds.<br>
+            Trade actions are simulated on your local balance.
+          </div>
+          <div style="margin-top:14px;">
+            <button class="btn secondary" style="width:100%;" onclick="logout()">Logout</button>
+          </div>
+        </div>
+
+        <div class="main">
+          <div class="card hero">
+            <div class="hero-left">
+              <div class="small">Welcome</div>
+              <h2 style="margin:6px 0 0;">Binance-style crypto workspace</h2>
+              <div class="stats">
+                <div class="stat">
+                  <div class="label">BTC</div>
+                  <div class="value" id="statBTC">--</div>
+                </div>
+                <div class="stat">
+                  <div class="label">ETH</div>
+                  <div class="value" id="statETH">--</div>
+                </div>
+                <div class="stat">
+                  <div class="label">BNB</div>
+                  <div class="value" id="statBNB">--</div>
+                </div>
+                <div class="stat">
+                  <div class="label">USDT Balance</div>
+                  <div class="value" id="statUSDT">--</div>
+                </div>
+              </div>
+            </div>
+            <div class="hero-right">
+              <div class="small">Selected pair</div>
+              <div style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;">
+                <div>
+                  <div class="pair" id="selectedPairLabel">BTCUSDT</div>
+                  <div class="ghost">Spot / paper trade</div>
+                </div>
+                <div style="text-align:right;">
+                  <div class="small">Live Price</div>
+                  <div class="pair" id="selectedPairPrice">--</div>
+                </div>
+              </div>
+              <div style="margin-top:14px;" class="toolbar">
+                <select id="pairSelect" onchange="changePair()">
+                  <option value="BTCUSDT">BTCUSDT</option>
+                  <option value="ETHUSDT">ETHUSDT</option>
+                  <option value="BNBUSDT">BNBUSDT</option>
+                  <option value="SOLUSDT">SOLUSDT</option>
+                  <option value="XRPUSDT">XRPUSDT</option>
+                </select>
+                <button class="btn secondary" onclick="refreshAll()">Refresh</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="sections">
+            <div class="card panel chartbox">
+              <div class="chart-head">
+                <div>
+                  <div class="small">Chart</div>
+                  <div class="pair" id="chartTitle">BTCUSDT Candles</div>
+                </div>
+                <div class="chartmeta">
+                  <div id="chartOhlc">O: -- H: -- L: -- C: --</div>
+                </div>
+              </div>
+              <canvas id="chartCanvas" width="1200" height="420"></canvas>
+            </div>
+
+            <div class="card panel">
+              <h3>Hot Market</h3>
+              <table class="markets">
+                <thead>
+                  <tr>
+                    <th>Coin</th>
+                    <th>Price</th>
+                    <th>Change</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>BTCUSDT</td><td class="price" id="mBTC">--</td><td id="cBTC">--</td></tr>
+                  <tr><td>ETHUSDT</td><td class="price" id="mETH">--</td><td id="cETH">--</td></tr>
+                  <tr><td>BNBUSDT</td><td class="price" id="mBNB">--</td><td id="cBNB">--</td></tr>
+                  <tr><td>SOLUSDT</td><td class="price" id="mSOL">--</td><td id="cSOL">--</td></tr>
+                  <tr><td>XRPUSDT</td><td class="price" id="mXRP">--</td><td id="cXRP">--</td></tr>
+                </tbody>
+              </table>
+              <div class="footer-note">Price change uses local comparison with the previous tick.</div>
+            </div>
+          </div>
+
+          <div id="marketTab" class="card panel show">
+            <h3>Market Overview</h3>
+            <div class="list" id="marketCards"></div>
+          </div>
+
+          <div id="tradeTab" class="card panel">
+            <h3>Trade</h3>
+            <div class="trade-grid">
+              <div>
+                <div class="field" style="margin-bottom:12px;">
+                  <label class="small">Side</label>
+                  <div class="seg">
+                    <button id="buySideBtn" class="active" onclick="setSide('BUY')">Buy</button>
+                    <button id="sellSideBtn" onclick="setSide('SELL')">Sell</button>
+                  </div>
+                </div>
+                <div class="field" style="margin-bottom:12px;">
+                  <label class="small">Order Type</label>
+                  <div class="seg">
+                    <button id="marketTypeBtn" class="active" onclick="setOrderType('MARKET')">Market</button>
+                    <button id="limitTypeBtn" onclick="setOrderType('LIMIT')">Limit</button>
+                  </div>
+                </div>
+                <div class="field" style="margin-bottom:12px;">
+                  <label class="small">Pair</label>
+                  <select id="tradePair" onchange="syncPair()">
+                    <option value="BTCUSDT">BTCUSDT</option>
+                    <option value="ETHUSDT">ETHUSDT</option>
+                    <option value="BNBUSDT">BNBUSDT</option>
+                    <option value="SOLUSDT">SOLUSDT</option>
+                    <option value="XRPUSDT">XRPUSDT</option>
+                  </select>
+                </div>
+                <div class="field" style="margin-bottom:12px;">
+                  <label class="small">Amount (coin units)</label>
+                  <input id="tradeAmount" type="number" step="0.000001" placeholder="0.01" />
+                </div>
+                <div class="field" style="margin-bottom:12px;">
+                  <label class="small">Limit Price (USDT)</label>
+                  <input id="tradePrice" type="number" step="0.01" placeholder="Auto for market order" />
+                </div>
+                <div class="split">
+                  <button class="btn green" onclick="placeTrade('BUY')">Buy</button>
+                  <button class="btn red" onclick="placeTrade('SELL')">Sell</button>
+                </div>
+              </div>
+              <div>
+                <div class="rowitem">
+                  <div class="left">
+                    <div class="title">Order preview</div>
+                    <div class="sub" id="orderPreview">Select pair and amount</div>
+                  </div>
+                </div>
+                <div style="height:12px;"></div>
+                <div class="rowitem">
+                  <div class="left">
+                    <div class="title">Paper balances</div>
+                    <div class="sub" id="paperBalances">Loading...</div>
+                  </div>
+                </div>
+                <div class="footer-note">
+                  LIMIT order here is also simulated and fills immediately if you submit it.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="walletTab" class="card panel">
+            <h3>Wallet</h3>
+            <div class="list" id="walletList"></div>
+          </div>
+
+          <div id="ordersTab" class="card panel">
+            <h3>Orders</h3>
+            <div class="list" id="ordersList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="box">
-    <h3>💰 Trade (Demo)</h3>
-    <button onclick="buy()">Buy</button>
-    <button onclick="sell()">Sell</button>
-  </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
-</div>
+    const firebaseConfig = {
+      apiKey: "AIzaSyB3lYDIr8ElAWk-jwnOWxubtVS-TeSSyOg",
+      authDomain: "uyguy-ab047.firebaseapp.com",
+      projectId: "uyguy-ab047",
+      storageBucket: "uyguy-ab047.firebasestorage.app",
+      messagingSenderId: "297739792713",
+      appId: "1:297739792713:web:72af3ba75fabcacb3caa98"
+    };
 
-<script type="module">
-// Firebase
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } 
-from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
-const app = initializeApp({
-  apiKey: "AIzaSy...",
-  authDomain: "uyguy-ab047.firebaseapp.com"
-});
-const auth = getAuth(app);
+    const state = {
+      prices: {},
+      prevPrices: {},
+      candles: [],
+      selectedPair: "BTCUSDT",
+      side: "BUY",
+      orderType: "MARKET",
+      balances: {
+        USDT: 10000,
+        BTC: 0,
+        ETH: 0,
+        BNB: 0,
+        SOL: 0,
+        XRP: 0
+      },
+      orders: [],
+      email: ""
+    };
 
-// login
-window.signup = () => {
-  createUserWithEmailAndPassword(auth,email.value,pass.value)
-  .then(()=>start());
-};
+    const pairCoins = {
+      BTCUSDT: "BTC",
+      ETHUSDT: "ETH",
+      BNBUSDT: "BNB",
+      SOLUSDT: "SOL",
+      XRPUSDT: "XRP"
+    };
 
-window.loginUser = () => {
-  signInWithEmailAndPassword(auth,email.value,pass.value)
-  .then(()=>start());
-};
+    let marketTimer = null;
+    let candleTimer = null;
+    let chartCtx = null;
+    let currentTab = "market";
 
-// start app
-function start(){
-  login.style.display="none";
-  app.style.display="block";
+    function money(n){
+      if (n === null || n === undefined || Number.isNaN(n)) return "--";
+      return "$" + Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 });
+    }
 
-  // chart
-  new TradingView.widget({
-    container_id: "chart",
-    symbol: "BINANCE:BTCUSDT",
-    interval: "1",
-    theme: "dark"
-  });
+    function coinFormat(n){
+      if (n === null || n === undefined || Number.isNaN(n)) return "--";
+      return Number(n).toLocaleString(undefined, { maximumFractionDigits: 8 });
+    }
 
-  loadMarket();
-}
+    function changeClass(v){
+      if (v > 0) return "pos";
+      if (v < 0) return "neg";
+      return "muted";
+    }
 
-// market
-async function loadMarket(){
-  setInterval(async ()=>{
-    const res=await fetch("https://api.binance.com/api/v3/ticker/price");
-    const data=await res.json();
+    function renderLogin(email){
+      document.getElementById("topEmail").textContent = email ? email : "Not signed in";
+      document.getElementById("loginPage").style.display = "block";
+      document.getElementById("appPage").style.display = "none";
+    }
 
-    let html="";
-    data.slice(0,20).forEach(c=>{
-      html+=`<div class="coin">${c.symbol} - $${parseFloat(c.price).toFixed(2)}</div>`;
+    function renderApp(email){
+      document.getElementById("topEmail").textContent = email || "Signed in";
+      document.getElementById("loginPage").style.display = "none";
+      document.getElementById("appPage").style.display = "block";
+      startLoops();
+      refreshAll();
+      updateWalletUI();
+      updateOrdersUI();
+      showTab(currentTab);
+    }
+
+    window.signup = async function(){
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      try{
+        await createUserWithEmailAndPassword(auth, email, password);
+      }catch(err){
+        alert(err.message);
+      }
+    };
+
+    window.loginUser = async function(){
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      try{
+        await signInWithEmailAndPassword(auth, email, password);
+      }catch(err){
+        alert(err.message);
+      }
+    };
+
+    window.logout = async function(){
+      try{
+        await signOut(auth);
+      }catch(err){
+        alert(err.message);
+      }
+    };
+
+    window.showTab = function(tab){
+      currentTab = tab;
+      const ids = ["marketTab","tradeTab","chartTab","walletTab","ordersTab"];
+      ids.forEach(id => document.getElementById(id).classList.remove("show"));
+      document.getElementById(tab + "Tab").classList.add("show");
+
+      document.querySelectorAll(".navbtn").forEach(btn => btn.classList.remove("active"));
+      const map = {market:0, chart:1, trade:2, wallet:3, orders:4};
+      if (document.querySelectorAll(".navbtn")[map[tab]]) {
+        document.querySelectorAll(".navbtn")[map[tab]].classList.add("active");
+      }
+
+      if (tab === "chart") drawChart();
+      if (tab === "wallet") updateWalletUI();
+      if (tab === "orders") updateOrdersUI();
+    };
+
+    window.changePair = function(){
+      state.selectedPair = document.getElementById("pairSelect").value;
+      document.getElementById("tradePair").value = state.selectedPair;
+      document.getElementById("selectedPairLabel").textContent = state.selectedPair;
+      document.getElementById("chartTitle").textContent = state.selectedPair + " Candles";
+      loadCandles();
+      refreshPreview();
+      drawChart();
+    };
+
+    window.syncPair = function(){
+      state.selectedPair = document.getElementById("tradePair").value;
+      document.getElementById("pairSelect").value = state.selectedPair;
+      document.getElementById("selectedPairLabel").textContent = state.selectedPair;
+      document.getElementById("chartTitle").textContent = state.selectedPair + " Candles";
+      loadCandles();
+      refreshPreview();
+      drawChart();
+    };
+
+    window.setSide = function(side){
+      state.side = side;
+      document.getElementById("buySideBtn").classList.toggle("active", side === "BUY");
+      document.getElementById("sellSideBtn").classList.toggle("active", side === "SELL");
+      refreshPreview();
+    };
+
+    window.setOrderType = function(type){
+      state.orderType = type;
+      document.getElementById("marketTypeBtn").classList.toggle("active", type === "MARKET");
+      document.getElementById("limitTypeBtn").classList.toggle("active", type === "LIMIT");
+      document.getElementById("tradePrice").disabled = type === "MARKET";
+      if (type === "MARKET") document.getElementById("tradePrice").value = "";
+      refreshPreview();
+    };
+
+    window.placeTrade = function(side){
+      const pair = document.getElementById("tradePair").value;
+      const amount = parseFloat(document.getElementById("tradeAmount").value);
+      const coin = pairCoins[pair];
+      const marketPrice = state.prices[pair];
+      const limitInput = parseFloat(document.getElementById("tradePrice").value);
+
+      if (!amount || amount <= 0) {
+        alert("Amount dাও");
+        return;
+      }
+      const price = state.orderType === "LIMIT" && Number.isFinite(limitInput) ? limitInput : marketPrice;
+      if (!price || price <= 0) {
+        alert("Live price load হচ্ছে না");
+        return;
+      }
+
+      const cost = amount * price;
+
+      if (side === "BUY") {
+        if (state.balances.USDT < cost) {
+          alert("Not enough USDT");
+          return;
+        }
+        state.balances.USDT -= cost;
+        state.balances[coin] += amount;
+      } else {
+        if (state.balances[coin] < amount) {
+          alert("Not enough " + coin);
+          return;
+        }
+        state.balances[coin] -= amount;
+        state.balances.USDT += cost;
+      }
+
+      state.orders.unshift({
+        time: new Date().toLocaleTimeString(),
+        side,
+        pair,
+        type: state.orderType,
+        amount,
+        price,
+        total: cost
+      });
+
+      updateWalletUI();
+      updateOrdersUI();
+      refreshPreview();
+      alert(side + " order executed in paper mode");
+    };
+
+    window.refreshAll = function(){
+      updateMarketUI();
+      loadCandles();
+      refreshPreview();
+    };
+
+    function refreshPreview(){
+      const pair = document.getElementById("tradePair").value;
+      const amount = parseFloat(document.getElementById("tradeAmount").value) || 0;
+      const coin = pairCoins[pair];
+      const price = state.orderType === "MARKET" ? state.prices[pair] : parseFloat(document.getElementById("tradePrice").value);
+      const total = amount && price ? amount * price : 0;
+      document.getElementById("orderPreview").textContent =
+        `${state.side} ${pair} | ${amount || 0} ${coin} @ ${price ? price.toFixed(2) : "--"} = ${total ? total.toFixed(2) : "--"} USDT`;
+      document.getElementById("paperBalances").textContent =
+        `USDT ${coin}: ${coinFormat(state.balances[coin])}`;
+    }
+
+    function updateWalletUI(){
+      const list = document.getElementById("walletList");
+      const entries = Object.entries(state.balances);
+      list.innerHTML = entries.map(([k,v]) => `
+        <div class="rowitem">
+          <div class="left">
+            <div class="title">${k}</div>
+            <div class="sub">Paper balance</div>
+          </div>
+          <div class="price">${coinFormat(v)}</div>
+        </div>
+      `).join("");
+      document.getElementById("statUSDT").textContent = money(state.balances.USDT);
+      refreshPreview();
+    }
+
+    function updateOrdersUI(){
+      const list = document.getElementById("ordersList");
+      if (!state.orders.length){
+        list.innerHTML = `<div class="rowitem"><div class="left"><div class="title">No orders yet</div><div class="sub">Your simulated trades will appear here.</div></div></div>`;
+        return;
+      }
+      list.innerHTML = state.orders.map(o => `
+        <div class="rowitem">
+          <div class="left">
+            <div class="title">${o.side} ${o.pair}</div>
+            <div class="sub">${o.type} • ${o.time}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="price">${o.amount} @ ${o.price.toFixed(2)}</div>
+            <div class="sub">${o.total.toFixed(2)} USDT</div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    async function updateMarketUI(){
+      try{
+        const res = await fetch("https://api.binance.com/api/v3/ticker/price");
+        const data = await res.json();
+        const symbols = ["BTCUSDT","ETHUSDT","BNBUSDT","SOLUSDT","XRPUSDT"];
+
+        symbols.forEach(sym => {
+          const row = data.find(x => x.symbol === sym);
+          if (!row) return;
+
+          const price = parseFloat(row.price);
+          const prev = state.prevPrices[sym];
+          state.prevPrices[sym] = state.prices[sym] || price;
+          state.prices[sym] = price;
+
+          const pct = prev ? ((price - prev) / prev) * 100 : 0;
+          const clr = changeClass(pct);
+
+          const coin = sym.replace("USDT","");
+          const liveId = "m" + coin;
+          const changeId = "c" + coin;
+          const statId = "stat" + coin;
+
+          const liveEl = document.getElementById(liveId);
+          const changeEl = document.getElementById(changeId);
+          const statEl = document.getElementById(statId);
+
+          if (liveEl) liveEl.textContent = money(price);
+          if (changeEl){
+            changeEl.textContent = `${pct >= 0 ? "+" : ""}${pct.toFixed(2)}%`;
+            changeEl.className = clr;
+          }
+          if (statEl) statEl.textContent = money(price);
+
+          if (sym === state.selectedPair){
+            document.getElementById("selectedPairPrice").textContent = money(price);
+          }
+        });
+
+        renderMarketCards();
+        refreshPreview();
+      }catch(err){
+        console.log("Market update error:", err);
+      }
+    }
+
+    function renderMarketCards(){
+      const list = document.getElementById("marketCards");
+      const symbols = ["BTCUSDT","ETHUSDT","BNBUSDT","SOLUSDT","XRPUSDT"];
+      list.innerHTML = symbols.map(sym => {
+        const price = state.prices[sym];
+        const prev = state.prevPrices[sym];
+        const pct = prev && price ? ((price - prev) / prev) * 100 : 0;
+        const cls = changeClass(pct);
+        return `
+          <div class="rowitem">
+            <div class="left">
+              <div class="title">${sym}</div>
+              <div class="sub">Live quote from Binance API</div>
+            </div>
+            <div style="text-align:right">
+              <div class="price">${price ? money(price) : "--"}</div>
+              <div class="${cls}">${pct >= 0 ? "+" : ""}${pct.toFixed(2)}%</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function loadCandles(){
+      const pair = state.selectedPair;
+      try{
+        const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${pair}&interval=1m&limit=60`);
+        const data = await res.json();
+        state.candles = data.map(d => ({
+          time: d[0],
+          open: parseFloat(d[1]),
+          high: parseFloat(d[2]),
+          low: parseFloat(d[3]),
+          close: parseFloat(d[4])
+        }));
+        const last = state.candles[state.candles.length - 1];
+        if (last){
+          document.getElementById("chartOhlc").textContent =
+            `O: ${last.open.toFixed(2)} H: ${last.high.toFixed(2)} L: ${last.low.toFixed(2)} C: ${last.close.toFixed(2)}`;
+        }
+        drawChart();
+      }catch(err){
+        console.log("Candles error:", err);
+      }
+    }
+
+    function drawChart(){
+      const canvas = document.getElementById("chartCanvas");
+      const ctx = canvas.getContext("2d");
+      const dpr = window.devicePixelRatio || 1;
+      const cssW = canvas.clientWidth;
+      const cssH = canvas.clientHeight;
+      canvas.width = Math.floor(cssW * dpr);
+      canvas.height = Math.floor(cssH * dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      ctx.clearRect(0,0,cssW,cssH);
+
+      if (!state.candles.length){
+        ctx.fillStyle = "#848e9c";
+        ctx.font = "16px Arial";
+        ctx.fillText("Loading candles...", 20, 30);
+        return;
+      }
+
+      const candles = state.candles;
+      const pad = 40;
+      const w = cssW - pad*2;
+      const h = cssH - pad*2;
+
+      let min = Infinity, max = -Infinity;
+      candles.forEach(c => { min = Math.min(min, c.low); max = Math.max(max, c.high); });
+      const range = max - min || 1;
+      const xStep = w / candles.length;
+      const bodyW = Math.max(4, xStep * 0.55);
+
+      // grid
+      ctx.strokeStyle = "#2b3139";
+      ctx.lineWidth = 1;
+      for(let i=0;i<5;i++){
+        const y = pad + (h/4)*i;
+        ctx.beginPath();
+        ctx.moveTo(pad,y);
+        ctx.lineTo(cssW-pad,y);
+        ctx.stroke();
+      }
+
+      candles.forEach((c, i) => {
+        const x = pad + i * xStep + xStep/2;
+        const yOpen = pad + (max - c.open) / range * h;
+        const yClose = pad + (max - c.close) / range * h;
+        const yHigh = pad + (max - c.high) / range * h;
+        const yLow = pad + (max - c.low) / range * h;
+        const up = c.close >= c.open;
+        const color = up ? "#0ecb81" : "#f6465d";
+
+        // wick
+        ctx.strokeStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(x, yHigh);
+        ctx.lineTo(x, yLow);
+        ctx.stroke();
+
+        // body
+        const top = Math.min(yOpen, yClose);
+        const bottom = Math.max(yOpen, yClose);
+        const height = Math.max(1, bottom - top);
+        ctx.fillStyle = color;
+        ctx.fillRect(x - bodyW/2, top, bodyW, height);
+      });
+
+      // labels
+      ctx.fillStyle = "#848e9c";
+      ctx.font = "12px Arial";
+      ctx.fillText(max.toFixed(2), 8, pad + 4);
+      ctx.fillText(min.toFixed(2), 8, pad + h);
+    }
+
+    function startLoops(){
+      if (!marketTimer){
+        updateMarketUI();
+        marketTimer = setInterval(updateMarketUI, 1000);
+      }
+      if (!candleTimer){
+        loadCandles();
+        candleTimer = setInterval(loadCandles, 15000);
+      }
+    }
+
+    window.addEventListener("resize", () => drawChart());
+
+    document.getElementById("tradeAmount").addEventListener("input", refreshPreview);
+    document.getElementById("tradePrice").addEventListener("input", refreshPreview);
+
+    onAuthStateChanged(auth, (user) => {
+      if (user){
+        state.email = user.email;
+        renderApp(user.email);
+      } else {
+        renderLogin("");
+      }
     });
 
-    market.innerHTML=html;
-  },1000);
-}
-
-// demo trade
-window.buy=()=>alert("Buy order placed (demo)");
-window.sell=()=>alert("Sell order placed (demo)");
-
-</script>
-
+    // default setup
+    setOrderType("MARKET");
+    updateWalletUI();
+    updateOrdersUI();
+    loadCandles();
+    updateMarketUI();
+  </script>
 </body>
 </html>
