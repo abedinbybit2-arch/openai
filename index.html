@@ -1,64 +1,108 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Firebase + Hot Market</title>
+  <title>Crypto App</title>
   <style>
     body {
+      margin: 0;
       font-family: Arial;
-      text-align: center;
-      margin-top: 50px;
-    }
-    .box {
-      border: 1px solid #ccc;
-      padding: 20px;
-      width: 320px;
-      margin: 20px auto;
-      border-radius: 10px;
-    }
-    input {
-      width: 90%;
-      padding: 10px;
-      margin: 10px 0;
-    }
-    button {
-      padding: 10px 20px;
-      margin: 5px;
-      background: blue;
+      background: #0b0e11;
       color: white;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 400px;
+      margin: auto;
+      margin-top: 80px;
+    }
+
+    .card {
+      background: #181a20;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #000;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      background: #2b3139;
       border: none;
+      color: white;
       border-radius: 5px;
     }
-    #successPage {
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #fcd535;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    #dashboard {
       display: none;
+    }
+
+    .coin {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      border-bottom: 1px solid #2b3139;
+    }
+
+    .green { color: #0ecb81; }
+    .red { color: #f6465d; }
+
+    .topbar {
+      background: #181a20;
+      padding: 15px;
+      text-align: center;
+      font-weight: bold;
+      border-bottom: 1px solid #2b3139;
     }
   </style>
 </head>
 <body>
 
-<div class="box" id="loginPage">
-  <h2>Login / Signup</h2>
+<div class="topbar">💰 Crypto Market</div>
 
-  <input type="email" id="email" placeholder="Email"><br>
-  <input type="password" id="password" placeholder="Password"><br>
-
-  <button onclick="signup()">Sign Up</button>
-  <button onclick="login()">Login</button>
+<!-- LOGIN -->
+<div class="container" id="login">
+  <div class="card">
+    <h2>Login</h2>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="signup()">Sign Up</button><br><br>
+    <button onclick="loginUser()">Login</button>
+  </div>
 </div>
 
-<div class="box" id="successPage">
-  <h2>🎉 Success!</h2>
-  <p id="userEmail"></p>
+<!-- DASHBOARD -->
+<div class="container" id="dashboard">
+  <div class="card">
+    <h2>🔥 Hot Market</h2>
+    <p id="user"></p>
 
-  <h3>🔥 Hot Market</h3>
-  <div id="market">
-    <p id="btc">BTC: Loading...</p>
-    <p id="eth">ETH: Loading...</p>
-    <p id="bnb">BNB: Loading...</p>
-    <p id="sol">SOL: Loading...</p>
-    <p id="xrp">XRP: Loading...</p>
+    <div id="coins">
+      <div class="coin"><span>BTC</span><span id="BTC">...</span></div>
+      <div class="coin"><span>ETH</span><span id="ETH">...</span></div>
+      <div class="coin"><span>BNB</span><span id="BNB">...</span></div>
+      <div class="coin"><span>SOL</span><span id="SOL">...</span></div>
+      <div class="coin"><span>XRP</span><span id="XRP">...</span></div>
+    </div>
+
+    <br>
+    <button onclick="logout()">Logout</button>
   </div>
-
-  <button onclick="logout()">Logout</button>
 </div>
 
 <script type="module">
@@ -79,80 +123,79 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// UI change
-function showSuccess(email) {
-  document.getElementById("loginPage").style.display = "none";
-  document.getElementById("successPage").style.display = "block";
-  document.getElementById("userEmail").innerText = "Logged in as: " + email;
-
-  startMarket(); // market start
+// UI switch
+function showDashboard(email) {
+  document.getElementById("login").style.display = "none";
+  document.getElementById("dashboard").style.display = "block";
+  document.getElementById("user").innerText = "👤 " + email;
+  startMarket();
 }
 
 // Signup
 window.signup = function() {
-  const emailVal = document.getElementById("email").value;
-  const passwordVal = document.getElementById("password").value;
+  const email = document.getElementById("email").value;
+  const pass = document.getElementById("password").value;
 
-  createUserWithEmailAndPassword(auth, emailVal, passwordVal)
-    .then((userCredential) => {
-      showSuccess(userCredential.user.email);
-    })
-    .catch((error) => {
-      alert(error.message);
-    });
+  createUserWithEmailAndPassword(auth, email, pass)
+    .then(res => showDashboard(res.user.email))
+    .catch(err => alert(err.message));
 }
 
 // Login
-window.login = function() {
-  const emailVal = document.getElementById("email").value;
-  const passwordVal = document.getElementById("password").value;
+window.loginUser = function() {
+  const email = document.getElementById("email").value;
+  const pass = document.getElementById("password").value;
 
-  signInWithEmailAndPassword(auth, emailVal, passwordVal)
-    .then((userCredential) => {
-      showSuccess(userCredential.user.email);
-    })
-    .catch((error) => {
-      alert(error.message);
-    });
+  signInWithEmailAndPassword(auth, email, pass)
+    .then(res => showDashboard(res.user.email))
+    .catch(err => alert(err.message));
 }
 
 // Logout
 window.logout = function() {
   signOut(auth).then(() => {
-    document.getElementById("loginPage").style.display = "block";
-    document.getElementById("successPage").style.display = "none";
+    location.reload();
   });
 }
 
-// Market function
-let marketStarted = false;
+// Market
+let oldPrices = {};
 
 function startMarket() {
-  if (marketStarted) return;
-  marketStarted = true;
-
   setInterval(async () => {
-    try {
-      const res = await fetch("https://api.binance.com/api/v3/ticker/price");
-      const data = await res.json();
+    const res = await fetch("https://api.binance.com/api/v3/ticker/price");
+    const data = await res.json();
 
-      const price = (sym) => {
-        const c = data.find(x => x.symbol === sym);
-        return c ? parseFloat(c.price).toFixed(2) : "N/A";
-      };
+    const get = (sym) => {
+      const c = data.find(x => x.symbol === sym);
+      return parseFloat(c.price);
+    };
 
-      document.getElementById("btc").innerText = "BTC: $" + price("BTCUSDT");
-      document.getElementById("eth").innerText = "ETH: $" + price("ETHUSDT");
-      document.getElementById("bnb").innerText = "BNB: $" + price("BNBUSDT");
-      document.getElementById("sol").innerText = "SOL: $" + price("SOLUSDT");
-      document.getElementById("xrp").innerText = "XRP: $" + price("XRPUSDT");
+    update("BTC", get("BTCUSDT"));
+    update("ETH", get("ETHUSDT"));
+    update("BNB", get("BNBUSDT"));
+    update("SOL", get("SOLUSDT"));
+    update("XRP", get("XRPUSDT"));
 
-    } catch (e) {
-      console.log("API error", e);
-    }
   }, 1000);
 }
 
+function update(id, price) {
+  const el = document.getElementById(id);
+  const old = oldPrices[id];
+
+  el.innerText = "$" + price.toFixed(2);
+
+  if (old) {
+    if (price > old) {
+      el.className = "green";
+    } else if (price < old) {
+      el.className = "red";
+    }
+  }
+
+  oldPrices[id] = price;
+}
 </script>
 
 </body>
